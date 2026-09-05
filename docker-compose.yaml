@@ -1,0 +1,45 @@
+services:
+  skill_bridge-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: skill_bridge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: skillbridge
+    ports:
+      - "5434:5432"
+    volumes:
+      - skill_bridge-pgdata:/var/lib/postgresql/data
+
+  skill_bridge-redis:
+    image: redis:7
+    container_name: skill_bridge-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6381:6379"
+    volumes:
+      - skill_bridge-redisdata:/data
+
+
+  skill_bridge-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: skill_bridge-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5674:5672"     # AMQP — Spring Boot connects here
+      - "15674:15672"   # Management UI
+    volumes:
+      - skill_bridge-rabbitmqdata:/var/lib/rabbitmq
+
+
+volumes:
+  skill_bridge-pgdata:
+  skill_bridge-redisdata:
+  skill_bridge-rabbitmqdata:
+
+  
