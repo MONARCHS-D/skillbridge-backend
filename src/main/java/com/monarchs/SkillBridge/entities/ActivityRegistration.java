@@ -34,9 +34,8 @@ public class ActivityRegistration {
     private User user;
 
     @Builder.Default
-    @Enumerated(value = EnumType.STRING)
     @Column(length = 30)
-    private ActivityRegStatus status=ActivityRegStatus.REGISTERED;
+    private String status="REGISTERED";
 
     @CreationTimestamp
     @Column(name = "registered_at",updatable = false)

@@ -1,6 +1,5 @@
 package com.monarchs.SkillBridge.entities;
 
-import com.monarchs.SkillBridge.enums.ActivityType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,9 +30,11 @@ public class Activity {
     @Column(nullable = false)
     private String title;
 
-    @Enumerated(value = EnumType.STRING)
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "activity_type", nullable = false,length = 30)
-    private ActivityType activityType;
+    private String activityType;
 
     @Column(name = "start_date")
     private OffsetDateTime startDate;

@@ -1,6 +1,5 @@
 package com.monarchs.SkillBridge.entities;
 
-import com.monarchs.SkillBridge.enums.ApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
