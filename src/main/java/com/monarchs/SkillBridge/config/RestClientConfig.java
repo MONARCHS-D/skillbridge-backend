@@ -25,4 +25,10 @@ public class RestClientConfig {
                 .build();
     }
 
+    @Bean
+    public RestClient recommenderRestClient() {
+        return RestClient.builder()
+                .build();
+    }
+
 }
