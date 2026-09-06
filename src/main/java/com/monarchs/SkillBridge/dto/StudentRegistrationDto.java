@@ -23,6 +23,5 @@ public class StudentRegistrationDto extends BaseUserDto {
 
     private JsonNode certifications;
 
-
     private JsonNode projects;
 }

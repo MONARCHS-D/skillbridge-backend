@@ -31,15 +31,28 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
-      - "5674:5672"     # AMQP — Spring Boot connects here
-      - "15674:15672"   # Management UI
+      - "5674:5672"
+      - "15674:15672"
     volumes:
       - skill_bridge-rabbitmqdata:/var/lib/rabbitmq
+
+
+  recommender:
+    build:
+      context: ./recommender
+    container_name: skill_bridge-recommender
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    volumes:
+      - skill_bridge-modelcache:/root/.cache/huggingface
 
 
 volumes:
   skill_bridge-pgdata:
   skill_bridge-redisdata:
   skill_bridge-rabbitmqdata:
-
+  skill_bridge-modelcache:
   

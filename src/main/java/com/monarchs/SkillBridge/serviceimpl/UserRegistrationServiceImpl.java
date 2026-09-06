@@ -1,5 +1,6 @@
 package com.monarchs.SkillBridge.serviceimpl;
 
+import com.monarchs.SkillBridge.dto.ResendOtpDto;
 import tools.jackson.databind.ObjectMapper;
 import com.monarchs.SkillBridge.dto.BaseUserDto;
 import com.monarchs.SkillBridge.dto.OtpVerifyDto;
@@ -55,7 +56,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
 //      *** String otp and email in Redis for verification
         TempUserRegistrationDto tempData=TempUserRegistrationDto.builder()
                 .tempOtp(otp)
-                .expiryTime(LocalDateTime.now().plusMinutes(5))
+                .expiryTime(LocalDateTime.now().plusMinutes(3))
                 .role(role)
                 .baseUserDto(dto)
                 .build();
@@ -131,6 +132,49 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
         }
         redisTemplate.delete(dto.getEmail());
         return "User registration completed!";
+    }
+
+    @Override
+    public String resendOtpService(ResendOtpDto dto) {
+        String email=dto.getEmail();
+
+        String jsonData=redisTemplate.opsForValue().get(email);
+
+        if(jsonData==null){
+            throw new RuntimeException("No pending registration found or OTP has expired");
+        }
+
+        TempUserRegistrationDto tempUserData;
+
+        try {
+            tempUserData=objectMapper.readValue(jsonData, TempUserRegistrationDto.class);
+        }catch (Exception e){
+            log.error("Failed to read temporary registration data for {}", email, e);
+            throw new RuntimeException("Failed to process OTP request");
+        }
+
+        String newOtp=OtpGenerator.generateOtp(6);
+
+        tempUserData.setTempOtp(newOtp);
+        tempUserData.setExpiryTime(LocalDateTime.now().plusMinutes(3));
+
+        try {
+            String updatedJsonData=objectMapper.writeValueAsString(tempUserData);
+            redisTemplate.opsForValue().set(email,updatedJsonData,Duration.ofMinutes(3));
+        }catch (Exception e){
+            log.error("Failed to update OTP in Redis for {}", email, e);
+            throw new RuntimeException("Failed to store new OTP");
+        }
+
+        String emailBody= EmailBuilder.otpEmailTemplateBuilder(tempUserData.getBaseUserDto().getUsername(),newOtp);
+        EmailEvent emailEvent=EmailEvent.builder()
+                .receiverEmail(email)
+                .subject("Your new verification OTP")
+                .message(emailBody)
+                .build();
+        rabbitTemplate.convertAndSend(EMAIL_EXCHANGE,EMAIL_OTP_ROUTING_KEY,emailEvent);
+
+        return "A new otp has been sent to "+email;
     }
 
 }

@@ -38,9 +38,8 @@ public class Application {
     private String resume_url;
 
     @Builder.Default
-    @Enumerated(value = EnumType.STRING)
     @Column(nullable = false,length = 20)
-    private ApplicationStatus status=ApplicationStatus.APPLIED;
+    private String status="APPLIED";
 
     @CreationTimestamp
     @Column(name = "created_at",updatable = false)
